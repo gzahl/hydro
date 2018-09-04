@@ -1,8 +1,8 @@
 #Visualization
 
 #Colormap
-using Color
-cm = Uint32[Color.convert(Color.RGB24,c) for c in flipud(Color.colormap("RdBu"))]
+#using Color
+#cm = Uint32[Color.convert(Color.RGB24,c) for c in flipud(Color.colormap("RdBu"))]
 #cm = Uint32[Color.convert(Color.RGB24,c) for c in Color.colormap("RdBu")]
 
 #Visualize common matrix
@@ -24,29 +24,34 @@ function visualize_M(data::AbstractMatrix,
     ymax =  y[ye]    
 
     hdata = data[xs:ye, xs:xe]
-    p = FramedPlot()
+    xs = [string("x",i) for i = xe]
+    ys = [string("y",i) for i = ye]
+    #p = FramedPlot()
 
-    #look or set min and max values
-    if dmin == :find
-        hmin = minimum(hdata)
-    elseif isa(dmin, Real)
-        hmin = dmin
-    end
-
-    if dmax == :find
-        hmax = maximum(hdata)
-    elseif isa(dmax, Real)
-        hmax = dmax
-    end
-
-    clims = (minimum(hdata), maximum(hdata))
+#    #look or set min and max values
+#    if dmin == :find
+#        hmin = minimum(hdata)
+#    elseif isa(dmin, Real)
+#        hmin = dmin
+#    end
+#
+#    if dmax == :find
+#        hmax = maximum(hdata)
+#    elseif isa(dmax, Real)
+#        hmax = dmax
+#    end
+#
+#    clims = (minimum(hdata), maximum(hdata))
 
     #make image
-    img = Winston.data2rgb(hdata, clims, cm)
-    add(p, Image((xmin, xmax), (ymin, ymax), img;))
-    setattr(p, xrange=(xmin, xmax))
-    setattr(p, yrange=(ymin, ymax))
-    setattr(p, title=title)
+		#cm = Winston.colormap("jet", 10)
+    #img = Winston.data2rgb(hdata, clims, cm)
+	  #img = Winston.imagesc(hdata)
+    #add(p, Image((xmin, xmax), (ymin, ymax), img;))
+    #setattr(p, xrange=(xmin, xmax))
+    #setattr(p, yrange=(ymin, ymax))
+    #setattr(p, title=title)
+		p = heatmap(hdata)
 
     return p
 end
@@ -71,7 +76,7 @@ function visualize(hyd::data2d)
 
 
     #velocity
-    hdata = sqrt(hyd.velx.^2.0 .+ hyd.vely.^2.0)
+    hdata = sqrt.(hyd.velx.^2.0 .+ hyd.vely.^2.0)
     #hdata = hyd.velx[xs:ye, xs:xe]
 
     p3 = visualize_M(hdata,
@@ -104,30 +109,36 @@ function visualize(hyd::data2d)
     pressxy = Float64[hyd.press[hyd.nx-i+1,i] for i = hyd.nx:-1:1]
     epsxy = Float64[hyd.eps[hyd.nx-i+1,i] for i = hyd.nx:-1:1]
 
-    p11 =  plot(xy, rhoxy, "r",title="diagonal slice")
-    p11 = oplot(xy, abs(velxxy), "b")
-    p11 = oplot(xy, abs(velyxy), "c")
-    p11 = oplot(xy, pressxy, "g")
+    p11 = plot(xy, rhoxy, linecolor=:red,title="diagonal slice", label="rho")
+    p11 = plot!(xy, abs.(velxxy), linecolor=:blue, label="velx")
+    p11 = plot!(xy, abs.(velyxy), linecolor=:black, label="vely")
+    p11 = plot!(xy, pressxy, linecolor=:green, label="pres")
     #p11 = oplot(hyd.y, epsxy, "k")
 
 
     #middle slice
-    mid = int(hyd.nx/2)
-    p12 = plot(hyd.y, hyd.rho[:,mid], "r",title="middle slice")
-    p12 = oplot(hyd.y, hyd.vely[:,mid], "b")
-    p12 = oplot(hyd.y, hyd.press[:,mid], "g")
+    mid = Int(hyd.nx/2)
+    p12 = plot(hyd.y, hyd.rho[:,mid], linecolor=:red,title="middle slice")
+    p12 = plot!(hyd.y, hyd.vely[:,mid], linecolor=:blue)
+    p12 = plot!(hyd.y, hyd.press[:,mid], linecolor=:green)
     #p12 = oplot(hyd.y, hyd.eps[:,mid], "k")
 
 
-    t = Table(2,3)
-    t[1,1] = p1
-    t[1,2] = p2
-    t[2,1] = p3
-    t[2,2] = p4
-    
-    t[1,3] = p11
-    t[2,3] = p12
+    #t = Table(2,3)
+    #t[1,1] = p1
+    #t[1,2] = p2
+    #t[2,1] = p3
+    #t[2,2] = p4
+    #
+    #t[1,3] = p11
+    #t[2,3] = p12
 
-    display(t)
+    #display(p11)
+    savefig(p1,"p1.png")
+    savefig(p2,"p2.png")
+    savefig(p3,"p3.png")
+    savefig(p4,"p4.png")
+    savefig(p11,"p11.png")
+    savefig(p12,"p12.png")
 
 end

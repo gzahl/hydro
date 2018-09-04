@@ -2,11 +2,11 @@
 
 #gamma law
 function eos_press(rho, eps, gamma)
-    const pmin = 1.0e-10
-    const pmax = 1.0e20
+    pmin = 1.0e-10
+    pmax = 1.0e20
 
     press = (gamma - 1.0) .* rho .* eps
-    press = clamp(press, pmin, pmax)
+    press = clamp!(press, pmin, pmax)
     return press
 end
 
@@ -17,7 +17,7 @@ function eos_cs2(rho, eps, gamma)
     dpdrho = (gamma - 1.0) .* eps
     cs2 = dpdrho .+ dpde .* prs ./ (rho .+ 1.0e-30).^2.0
 
-    cs2 = clamp(cs2, 1.0e-10, 1.0e10)
+    cs2 = clamp!(cs2, 1.0e-10, 1.0e10)
 
     #for i = 1:length(cs2)
     #    if cs2[i] < 0.0

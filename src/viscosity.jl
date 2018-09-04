@@ -4,7 +4,7 @@
 #Artificial viscosity according to Colella & Woodward 1984 (eq. 4.5)
 function avisc_CW(u, v, g, nx, ny, dx, dy)
 
-    const cvisc = 0.1
+    cvisc = 0.1
 
     avisco_x = zeros(ny, nx)
     avisco_y = zeros(ny, nx)

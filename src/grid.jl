@@ -1,6 +1,6 @@
 #Grid setup
 
-type data1d
+mutable struct data1d
     x::Array{Float64,1} #cell centers
     xi::Array{Float64,1} #cell LEFT interfaces
 
@@ -88,7 +88,7 @@ type data1d
 end
 
 
-type data2d
+mutable struct data2d
     x::Array{Float64, 1} #cell centers for X
     y::Array{Float64, 1} #cell centers for Y
     xi::Array{Float64, 1} #cell LEFT interfaces

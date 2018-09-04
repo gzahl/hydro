@@ -35,27 +35,36 @@ function setup_blast(self::data2d)
 
     self.rho[:,:] = rho1*ones(self.ny, self.nx)
     self.press[:,:] = press1*ones(self.ny, self.nx)
-    self.eps[:,:] = press1./rho1./(gamma - 1.0)
+    self.eps[:,:] = press1./rho1./(gamma - 1.0)*ones(self.ny,self.nx)
     self.velx[:,:] = zeros(self.ny, self.nx)
     self.vely[:,:] = zeros(self.ny, self.nx)
 
-    midx = int(self.nx/2)
-    midy = int(self.ny/2)
+    midx = Int(self.nx/2)
+    midy = Int(self.ny/2)
 
 
     #circle=[1,3,4,4,5,5]
     #circle=[2,4,5,6,6,6,7,7]
-    circle=[3,5,6,7,8,9,9,10,10,10]
-    N = length(circle)
-    for j = 0:N-1
-        yy = j
-        xx = circle[N-j]
-
-        self.press[midy+yy, midx-xx:midx+xx] = press2
-        self.eps[midy+yy, midx-xx:midx+xx] = press2./rho1./(gamma - 1.0)
-        self.press[midy-yy, midx-xx:midx+xx] = press2
-        self.eps[midy-yy, midx-xx:midx+xx] = press2./rho1./(gamma - 1.0)
-    end
+    #circle=[3,5,6,7,8,9,9,10,10,10]
+		size=7
+    #N = length(circle)
+    #for j = 0:N-1
+    #    yy = j
+    #    xx = circle[N-j]
+#
+#        self.press[midy+yy, midx-xx:midx+xx] .= press2
+#        self.eps[midy+yy, midx-xx:midx+xx] .= press2./rho1./(gamma - 1.0)
+#        self.press[midy-yy, midx-xx:midx+xx] .= press2
+#        self.eps[midy-yy, midx-xx:midx+xx] .= press2./rho1./(gamma - 1.0)
+ #   end
+ 		for i = 1:self.nx, j = 1:self.ny
+			sqrdistance = (i-midx)^2 + (j-midy)^2
+			if sqrdistance <= size^2
+				self.press[i,j] = press2
+				self.eps[i,j] = press2/rho1/(gamma-1.0)
+			end
+		end
+				
 
     return self
 end
@@ -199,7 +208,7 @@ end
 
 #Taylor instability initial data according to Athena code
 function setup_taylor2(self::data2d)
-    rchange = int(0.5self.ny)
+    rchange = Int(0.5self.ny)
 
     A = 0.01
     grav = 0.005
@@ -253,8 +262,8 @@ function setup_kh(self::data2d)
     Ly = 0.5*abs(self.y[self.ny - self.g] - self.y[self.g+1])
 
     for j = (self.g+1):(self.ny - self.g), i = (self.g+1):(self.nx - self.g)
-        self.velx[j,i] += A*((1.0+cos(2pi*self.x[i]/Lx)*(1.0+cos(2pi*self.y[j]/Ly))))
-        #self.vely[j,i] += A*((1.0+sin(2pi*self.x[i]/Lx)*(1.0+sin(2pi*self.y[j]/Ly))))
+        #self.velx[j,i] += A*((1.0+cos(2pi*self.x[i]/Lx)*(1.0+cos(2pi*self.y[j]/Ly))))
+        self.vely[j,i] += A*((1.0+sin(2pi*self.x[i]/Lx)*(1.0+sin(2pi*self.y[j]/Ly))))
     end
 
     self.press = ones(self.ny, self.nx)*2.5

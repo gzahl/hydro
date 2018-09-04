@@ -63,36 +63,38 @@ function apply_refl_bcs(hyd::data2d)
 
     #setup x boundaries
     for j = 1:hyd.g
-        hyd.rho[:, j] = hyd.rho[:, hyd.g+1]
-        hyd.velx[:, j] = -hyd.velx[:, hyd.g+1]
-        hyd.vely[:, j] = -hyd.vely[:, hyd.g+1]
-        hyd.eps[:, j] = hyd.eps[:, hyd.g+1]
-        hyd.press[:, j] = hyd.press[:, hyd.g+1]
+        hyd.rho[:, j] = hyd.rho[:, 2hyd.g+1-j]
+        hyd.velx[:, j] = -hyd.velx[:, 2hyd.g+1-j]
+        hyd.vely[:, j] = -hyd.vely[:, 2hyd.g+1-j]
+        hyd.eps[:, j] = hyd.eps[:, 2hyd.g+1-j]
+        hyd.press[:, j] = hyd.press[:, 2hyd.g+1-j]
     end
 
-    for j = (hyd.nx-hyd.g+1) : hyd.nx
-        hyd.rho[:, j] = hyd.rho[:, hyd.nx-hyd.g]
-        hyd.velx[:, j] = -hyd.velx[:, hyd.nx-hyd.g]
-        hyd.vely[:, j] = -hyd.vely[:, hyd.nx-hyd.g]
-        hyd.eps[:, j] = hyd.eps[:, hyd.nx-hyd.g]
-        hyd.press[:, j] = hyd.press[:, hyd.nx-hyd.g]
+    for j = 1:hyd.g
+				reflj = hyd.nx-2hyd.g+j
+        hyd.rho[:, hyd.nx-j+1] = hyd.rho[:, reflj]
+        hyd.velx[:, hyd.nx-j+1] = -hyd.velx[:, reflj]
+        hyd.vely[:, hyd.nx-j+1] = -hyd.vely[:, reflj]
+        hyd.eps[:, hyd.nx-j+1] = hyd.eps[:, reflj]
+        hyd.press[:, hyd.nx-j+1] = hyd.press[:, reflj]
     end
 
     #y boundaries
     for j = 1:hyd.g
-        hyd.rho[j, :] = hyd.rho[hyd.g+1, :]
-        hyd.velx[j, :] = -hyd.velx[hyd.g+1, :]
-        hyd.vely[j, :] = -hyd.vely[hyd.g+1, :]
-        hyd.eps[j, :] = hyd.eps[hyd.g+1, :]
-        hyd.press[j, :] = hyd.press[hyd.g+1, :]
+        hyd.rho[j, :] = hyd.rho[2hyd.g+1-j, :]
+        hyd.velx[j, :] = -hyd.velx[2hyd.g+1-j, :]
+        hyd.vely[j, :] = -hyd.vely[2hyd.g+1-j, :]
+        hyd.eps[j, :] = hyd.eps[2hyd.g+1-j, :]
+        hyd.press[j, :] = hyd.press[2hyd.g+1-j, :]
     end
 
-    for j = (hyd.ny-hyd.g+1) : hyd.ny
-        hyd.rho[j, :] = hyd.rho[hyd.ny-hyd.g, :]
-        hyd.velx[j, :] = -hyd.velx[hyd.ny-hyd.g, :]
-        hyd.vely[j, :] = -hyd.vely[hyd.ny-hyd.g, :]
-        hyd.eps[j, :] = hyd.eps[hyd.ny-hyd.g, :]
-        hyd.press[j, :] = hyd.press[hyd.ny-hyd.g, :]
+    for j = 1:hyd.g
+				reflj = hyd.ny-2hyd.g+j
+        hyd.rho[hyd.ny-j+1, :] = hyd.rho[reflj, :]
+        hyd.velx[hyd.ny-j+1, :] = -hyd.velx[reflj, :]
+        hyd.vely[hyd.ny-j+1, :] = -hyd.vely[reflj, :]
+        hyd.eps[hyd.ny-j+1, :] = hyd.eps[reflj, :]
+        hyd.press[hyd.ny-j+1, :] = hyd.press[reflj, :]
     end
 
     #TODO: check corner boundaries

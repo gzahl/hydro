@@ -10,7 +10,8 @@ include("gravity.jl")
 include("viscosity.jl")
 include("integrators.jl")
 
-using Winston
+#using Winston
+using Plots
 
 #Primary variables to conserved variables
 function prim2con(rho::AbstractMatrix,
@@ -56,29 +57,33 @@ end
 
 
 #snapshot of the simulation
-function snapshot(hyd, it)
+function snapshot(hyd, var, name, it)
 
-    cm = Uint32[Color.convert(Color.RGB24,c) for c in flipud(Color.colormap("RdBu"))]
+    #cm = Uint32[Color.convert(Color.RGB24,c) for c in flipud(Color.colormap("RdBu"))]
     xs = hyd.g+1
     xe = hyd.nx-hyd.g
     ye = hyd.ny-hyd.g
 
-    hdata = hyd.rho[xs:ye, xs:xe]
-    pf=FramedPlot()
+    hdata = var[xs:ye, xs:xe]
+    #pf=FramedPlot()
     clims = (0., 2.5)
-    img = Winston.data2rgb(hdata, clims, cm)
-    add(pf, Image((hyd.x[xs], hyd.x[xe]), (hyd.y[xs], hyd.y[ye]), img;))
-    setattr(pf, xrange=(hyd.x[xs], hyd.x[xe]))
-    setattr(pf, yrange=(hyd.y[xs], hyd.y[ye]))
+    #img = Winston.data2rgb(hdata, clims, cm)
+	  #img = Winston.imagesc(hdata)
+    #add(pf, Image((hyd.x[xs], hyd.x[xe]), (hyd.y[xs], hyd.y[ye]), img;))
+		pf = heatmap(hdata,ratio=:equal)
+		#add(pf, img)
+    #setattr(pf, xrange=(hyd.x[xs], hyd.x[xe]))
+    #setattr(pf, yrange=(hyd.y[xs], hyd.y[ye]))
     #setattr(pf, title="rho")
 
-    setattr(pf.frame, 
-            draw_spine=false, 
-            draw_ticks=false,
-            draw_ticklabels=false)
+    #setattr(pf.frame, 
+    #        draw_spine=false, 
+    #        draw_ticks=false,
+    #        draw_ticklabels=false)
 
-    numb = lpad(it, 0, 3)
-    Winston.file(pf, "film_$(numb).png", width=200, height=200)
+    numb = lpad(it, 3, '0')
+    savefig(pf,"$(name)_$(numb).png")	
+		closeall()
 
     return nothing
 end
@@ -122,10 +127,10 @@ end
 
 function evolve(hyd, tend, gamma, cfl, nx, ny)
 
-    time = linspace(0.0, tend, int(tend*100))
+    time = range(0.0, length=100, stop=tend)
     it = 1
 
-    dt = 1.0e-5
+    dt = 1.0e-8
     dtp = dt
 
     #get initial timestep
@@ -135,7 +140,7 @@ function evolve(hyd, tend, gamma, cfl, nx, ny)
     hyd.q = prim2con(hyd.rho, hyd.velx, hyd.vely, hyd.eps)
 
     t = 0.0
-    i = 1
+    i = 0
 
     visualize(hyd)
 
@@ -143,11 +148,12 @@ function evolve(hyd, tend, gamma, cfl, nx, ny)
 
         if i % 10 == 0
             println("$i $t $dt")
-            visualize(hyd)
+            #visualize(hyd)
         end
 
         if time[it] <= t
-            snapshot(hyd, it)
+            snapshot(hyd, hyd.rho, "density", it)
+            snapshot(hyd, hyd.press, "pressure", it)
             it += 1
         end
 
@@ -169,11 +175,11 @@ end
 
 #basic parameters
 gamma = 1.4
-cfl = 0.6
+cfl = 0.4
 
 nx = 50
 ny = 50
-tend = 5.0
+tend = 1.0e-1
 
 
 #initialize
@@ -192,14 +198,15 @@ hyd = grid_setup(hyd, 0.0, 1.0, 0.0, 1.0)
 
 #set up initial data
 #hyd = setup_taylor2(hyd)
-#hyd = setup_blast(hyd)
-hyd = setup_tubexy(hyd)
+hyd = setup_blast(hyd)
+#hyd = setup_tubexy(hyd)
 #hyd = setup_tubey(hyd)
+#hyd = setup_tubex(hyd)
 #hyd = setup_collision(hyd)
 #hyd = setup_fall(hyd)
 #hyd = setup_kh(hyd)
 
-visualize(hyd)
+#visualize(hyd)
 
 #main integration loop
 hyd = evolve(hyd, tend, gamma, cfl, nx, ny)
